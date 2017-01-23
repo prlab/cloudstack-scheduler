@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>New VM</h2>
+  <form action="{{ url_for('newvm') }}" method=post>
+    <div class=zon>
+      Zone:
+      <select name='zone'>
+        {% for zone in zon %}
+          <option value="{{ zone['id'] }}">{{ zone['name'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class=temp>
+      Template:
+      <select name = 'template'>
+        {% for templ in temp %}
+          <option value="{{ templ['id'] }}">{{ templ['name'] }}</option>
+        {% endfor %}
+        </select>
+      </div>
+    <div class=serv>
+      Service offering:
+      <select name = 'service'>
+          {% for service in serv %}
+            <option value="{{ service['id'] }}">{{ service['name'] }}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class=name>
+      VM name: <input type=text name=vmname>
+    </div>
+    <div class=sdate>
+          From: <input type=datetime-local name=start_date value="{{ now }}" >
+    </div>
+    <div class=edate>
+          To: <input type=datetime-local name=end_date value="{{ now }}" >
+    </div>
+    <div class=duration>
+          Duration: <input type=text name=duration> minutes
+    </div>
+    <dd><input type=submit value='Schedule VM'>
+  </form>
+{% endblock %}

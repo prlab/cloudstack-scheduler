@@ -1,0 +1,18 @@
+In order to use back end:
+
+Import the schcs (Temporary Name) library
+
+The scheduler calls take place using the Scheduler class. It has the following functions:
+  1. Scheduler(path): Constructor of the class. It takes as arguments the path to the configuration file
+  2. listjobs(): Return a list of all the pending jobs in the form of a dictionary
+  3. listjobs(User): Return a list of all the pending jobs for the specific user in the form of a dictionary
+  4. schedulevm(user, zone, template, service, name, startdate, enddate, duration): Schedule the deployment of a vm between a specific (timedate)startdate and a (timedate)enddate and with a specific name (u)name that will run for (timedate)duration
+  5. cancel(uuid): Cancels a scheduled job. It takes as argument the uuid you got from running the listjobs.
+
+The user calls take place using the User class. It has the following functions:
+  1. auth(api_url,username,password): Constructor of the class. It takes as arguments the api url, the username and the password. If it returns False, please discard this user
+  2. listServOff(): Returns a list of all the available service offerings. The service offerings are dictionaries that contain the following: 'id': u, 'name': u .
+  3. listTempl(): Returns a list of all the available templates. The templates are dictionaries that contain the following: id': u, 'name': u .
+  4. listZones(): Returns a list of all the available zones. The zones are dictionaries that contain the following: id': u, 'name': u .
+
+See tests/test.py for an example on how to use the library!

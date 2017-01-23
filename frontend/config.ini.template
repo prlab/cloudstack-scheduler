@@ -1,0 +1,6 @@
+[global]
+maxmemory: 1024
+minutesdelta: 15
+api_url: http://localhost:8080/client/api
+api_key:
+secret_key:

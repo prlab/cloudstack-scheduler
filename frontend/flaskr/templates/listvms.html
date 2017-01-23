@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block calendar %}
+<meta charset='utf-8' />
+<link href="{{ url_for('static', filename='fullcalendar/fullcalendar.min.css') }}" rel='stylesheet' />
+<link href="{{ url_for('static', filename='fullcalendar/fullcalendar.print.css') }}" rel='stylesheet' media='print' />
+<script src="{{ url_for('static', filename='fullcalendar/lib/moment.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/lib/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/fullcalendar.min.js') }}"></script>
+<script>
+	$(document).ready(function() {
+		$('#calendar').fullCalendar({
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+			defaultDate: Date.now(),
+			editable: false,
+			eventLimit: true, // allow "more" link when too many events
+			events: {
+				url: 'data',
+				error: function() {
+					$('#script-warning').show();
+				}
+			},
+			loading: function(bool) {
+				$('#loading').toggle(bool);
+			}
+		});
+	});
+</script>
+<style>
+	body {
+		margin: 0;
+		padding: 0;
+		font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+		font-size: 14px;
+	}
+	#script-warning {
+		display: none;
+		background: #eee;
+		border-bottom: 1px solid #ddd;
+		padding: 0 10px;
+		line-height: 40px;
+		text-align: center;
+		font-weight: bold;
+		font-size: 12px;
+		color: red;
+	}
+	#loading {
+		display: none;
+		position: absolute;
+		top: 10px;
+		right: 10px;
+	}
+	#calendar {
+		max-width: 900px;
+		margin: 40px auto;
+		padding: 0 10px;
+	}
+</style>
+{% endblock %}
+
+
+{% block body %}
+  <h2>List VMs</h2>
+    <div class=listjobs>
+      <table style="width:100%">
+        <tr>
+          {% if  usertype == 1 %} <th>User</th> {% endif %}
+          <th>Name</th>
+          <th>Zone</th>
+          <th>Service Offering</th>
+          <th>Template</th>
+          <th>Start</th>
+          <th>Stop</th>
+          <th>IP</th>
+        </tr>
+        {% for vm in jobs %}
+        <form action="{{ url_for('listvms') }}" method=post>
+        <tr>
+	  <input type="hidden" name="id" value={{ vm['id'] }}>
+          {% if  usertype == 1 %} <th>{{ vm['user'] }}</th> {% endif %}
+          <th>{{ vm['name'] }}</th>
+          <th>{{ vm['zone'] }}</th>
+          <th>{{ vm['serv'] }}</th>
+          <th>{{ vm['template'] }}</th>
+          <th>{{ vm['start'] }}</th>
+          <th>{{ vm['end'] }}</th>
+          <th>{{ vm['ip'] }}</th>
+	  <th> <input type="submit" value="Cancel"> </th>
+        </tr>
+      </form>
+        {% endfor %}
+    </table>
+    </div>
+
+		<div id='script-warning'>
+			Error getting data from <code>/data</code> endpoint.
+		</div>
+
+		<div id='loading'>loading...</div>
+
+		<div id='calendar'></div>
+{% endblock %}
