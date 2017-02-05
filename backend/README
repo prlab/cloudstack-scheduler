@@ -14,5 +14,6 @@ The user calls take place using the User class. It has the following functions:
   2. listServOff(): Returns a list of all the available service offerings. The service offerings are dictionaries that contain the following: 'id': u, 'name': u .
   3. listTempl(): Returns a list of all the available templates. The templates are dictionaries that contain the following: id': u, 'name': u .
   4. listZones(): Returns a list of all the available zones. The zones are dictionaries that contain the following: id': u, 'name': u .
+  5. listNet(): Returns a list of all the available networks. The zones are dictionaries that contain the following: id': u, 'name': u .
 
 See tests/test.py for an example on how to use the library!

@@ -17,7 +17,6 @@ class Scheduler:
   mycs = None #The Cloudstack api wrapper
   jobs = defaultdict(list) #list of the scheduled jobs {username, domainid, zone, template, service_offering, network, name, start_date, end_date, deployjobid, destroyjobid, vmid, ip}
   maxmemory=0 #max memory that can be used by the scheduler
-  minutesdelta=0 #step to increase when i search for a slot
   api_url="" #The api url of Cloudstack
   api_key="" #The api key of the admin user
   secret_key="" #The secret key of the admin user
@@ -31,7 +30,6 @@ class Scheduler:
       settings = ConfigParser.ConfigParser()
       settings.read(path)
       self.maxmemory=int(settings.get('global', 'maxmemory'))
-      self.minutesdelta=int(settings.get('global', 'minutesdelta'))
       self.api_url=settings.get('global', 'api_url')
       self.api_key=settings.get('global', 'api_key')
       self.secret_key=settings.get('global', 'secret_key')
@@ -172,7 +170,7 @@ class Scheduler:
               #print "DEBUG: Adding vm with name \"" + name + "\" to be created at " + str(startdate) + " and to be destroyed at " + str(startdate+duration)
               self.addvm(user, zone, template, service, network, name, startdate, startdate+duration)
               return 1
-          startdate += datetime.timedelta(minutes=self.minutesdelta)
+          startdate = startdate + duration + datetime.timedelta(minutes=15)
       return 0
 
 
