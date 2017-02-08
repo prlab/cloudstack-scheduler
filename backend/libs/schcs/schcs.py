@@ -170,7 +170,7 @@ class Scheduler:
               #print "DEBUG: Adding vm with name \"" + name + "\" to be created at " + str(startdate) + " and to be destroyed at " + str(startdate+duration)
               self.addvm(user, zone, template, service, network, name, startdate, startdate+duration)
               return 1
-          startdate = startdate + duration + datetime.timedelta(minutes=15)
+          startdate = startdate + duration + datetime.timedelta(seconds=10)
       return 0
 
 
