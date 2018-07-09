@@ -19,9 +19,7 @@ app.secret_key = 'test'
 
 @app.route('/')
 def index():
-    if 'username' in session:
-        return redirect(url_for('listvms'))
-    return redirect(url_for('login'))
+    return render_template("main.html")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -97,6 +95,21 @@ def listvms():
         return render_template('listvms.html', jobs=jobs, usertype=usertype)
     else:
         return redirect(url_for('login'))
+
+@app.route('/calendar',  methods=['GET', 'POST'])
+def calendarvms():
+    if 'username' in session:
+        username = session['username']
+        u = sess[username]
+        usertype = u.usertype
+        if usertype == ADMIN:
+            jobs = s.listjobs()
+        elif usertype == USER:
+            jobs = s.listjobs(u)
+        return render_template('calendar.html', jobs=jobs, usertype=usertype)
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/data')
 def return_data():

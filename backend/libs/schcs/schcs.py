@@ -15,8 +15,9 @@ class Scheduler:
 
   scheduler = None #The apscheduler scheduler
   mycs = None #The Cloudstack api wrapper
-  jobs = defaultdict(list) #list of the scheduled jobs {username, domainid, zone, template, service_offering, network, name, start_date, end_date, deployjobid, destroyjobid, vmid, ip}
+  jobs = defaultdict(list) #list of the scheduled jobs {username, domainid, zone, template, service_offering, name, start_date, end_date, deployjobid, destroyjobid, vmid, ip}
   maxmemory=0 #max memory that can be used by the scheduler
+  minutesdelta=0 #step to increase when i search for a slot
   api_url="" #The api url of Cloudstack
   api_key="" #The api key of the admin user
   secret_key="" #The secret key of the admin user
@@ -30,6 +31,7 @@ class Scheduler:
       settings = ConfigParser.ConfigParser()
       settings.read(path)
       self.maxmemory=int(settings.get('global', 'maxmemory'))
+      self.minutesdelta=int(settings.get('global', 'minutesdelta'))
       self.api_url=settings.get('global', 'api_url')
       self.api_key=settings.get('global', 'api_key')
       self.secret_key=settings.get('global', 'secret_key')
@@ -79,10 +81,6 @@ class Scheduler:
         rs = self.mycs.listZones(id=id)
         return rs['zone'][0]['name']
 
-  def getNetName(self, id):
-        rs = self.mycs.listNetworks(id=id)
-        return rs['network'][0]['name']
-
   def getIP(self, id):
         rs = self.mycs.listNics(virtualmachineid=id)
         return rs['nic'][0]['ipaddress']
@@ -104,28 +102,27 @@ class Scheduler:
           vm['zone'] = self.getZoneName(value[2])
           vm['template'] = self.getTemplName(value[3])
           vm['serv'] = self.getServOffName(value[4])
-          vm['net'] = self.getNetName(value[5])
-          vm['name'] = value[6]
-          vm['start'] = value[7]
-          vm['end'] = value[8]
-          if datetime.datetime.now() > value[7]:
-              vm['ip'] = value[12]
+          vm['name'] = value[5]
+          vm['start'] = value[6]
+          vm['end'] = value[7]
+          if datetime.datetime.now() > value[6]:
+              vm['ip'] = value[11]
           response.append(vm.copy())
 
       return response
 
-  def deployvm(self, account, domainid, serviceid, templateid, networkid, zoneid, name, uid):
-    rs = self.mycs.deployVirtualMachine(serviceofferingid=serviceid, templateid=templateid, zoneid=zoneid, networkids=networkid, account=account, domainid=domainid, name=name, displayname=name)
+  def deployvm(self, account, domainid, serviceid, templateid, zoneid, name, uid):
+    rs = self.mycs.deployVirtualMachine(serviceofferingid=serviceid, templateid=templateid, zoneid=zoneid, account=account, domainid=domainid, name=name, displayname=name)
     id = rs['id']
     self.jobs[uid].append(id)
     self.jobs[uid].append(self.getIP(id))
 
   def destroyvm(self, uid):
-    vmid = self.jobs[uid][11]
+    vmid = self.jobs[uid][10]
     self.mycs.destroyVirtualMachine(id=vmid)
     del self.jobs[uid]
 
-  def addvm(self, user, zone, template, service, network, name, startdate, enddate):
+  def addvm(self, user, zone, template, service, name, startdate, enddate):
     uid=str(uuid.uuid4())
     username = copy(user.username)
     domainid = copy(user.domainid)
@@ -135,42 +132,41 @@ class Scheduler:
     self.jobs[uid].append(zone)
     self.jobs[uid].append(template)
     self.jobs[uid].append(service)
-    self.jobs[uid].append(network)
     self.jobs[uid].append(name)
     self.jobs[uid].append(startdate)
     self.jobs[uid].append(enddate)
 
-    deployljob = self.scheduler.add_job(self.deployvm,'date',run_date=startdate,kwargs={"account":username, "domainid":domainid, "serviceid":service, "templateid":template, "zoneid":zone, "networkid":network, "name":name, "uid":uid})
+    deployljob = self.scheduler.add_job(self.deployvm,'date',run_date=startdate,kwargs={"account":username, "domainid":domainid, "serviceid":service, "templateid":template, "zoneid":zone, "name":name, "uid":uid})
     destroyjob = self.scheduler.add_job(self.destroyvm, 'date', run_date=enddate, kwargs={"uid":uid})
 
     self.jobs[uid].append(deployljob.id)
     self.jobs[uid].append(destroyjob.id)
 
   def cancel(self, uid):
-      if datetime.datetime.now() > self.jobs[uid][7]:
-          self.scheduler.remove_job(self.jobs[uid][10])
+      if datetime.datetime.now() > self.jobs[uid][6]:
+          self.scheduler.remove_job(self.jobs[uid][9])
           self.destroyvm(uid)
       else:
+          self.scheduler.remove_job(self.jobs[uid][8])
           self.scheduler.remove_job(self.jobs[uid][9])
-          self.scheduler.remove_job(self.jobs[uid][10])
           del self.jobs[uid]
 
-  def schedulevm(self, user, zone, template, service, network, name, startdate, enddate, duration):
+  def schedulevm(self, user, zone, template, service, name, startdate, enddate, duration):
       userquoata=self.getuserquota(user)
       vmmem=self.getServOffMem(service)
       while enddate - startdate >= duration:
           totalmemory=vmmem
           usermemory=vmmem
           for key, vm in self.jobs.iteritems():
-              if vm[7] <= startdate + duration and vm[8] >= startdate:
+              if vm[6] <= startdate + duration and vm[7] >= startdate:
                   totalmemory += self.getServOffMem(vm[4])
                   if user.username == vm[0]:
                     usermemory += self.getServOffMem(vm[4])
           if totalmemory <= self.maxmemory and usermemory <= userquoata:
               #print "DEBUG: Adding vm with name \"" + name + "\" to be created at " + str(startdate) + " and to be destroyed at " + str(startdate+duration)
-              self.addvm(user, zone, template, service, network, name, startdate, startdate+duration)
+              self.addvm(user, zone, template, service, name, startdate, startdate+duration)
               return 1
-          startdate = startdate + duration + datetime.timedelta(seconds=10)
+          startdate += datetime.timedelta(minutes=self.minutesdelta)
       return 0
 
 
@@ -224,12 +220,5 @@ class User:
     response=[]
     rs = self.mycs.listZones()
     for tm in rs['zone']:
-      response.append({'id':tm['id'],'name':tm['name']})
-    return response
-
-  def listNet(self):
-    response=[]
-    rs = self.mycs.listNetworks()
-    for tm in rs['network']:
       response.append({'id':tm['id'],'name':tm['name']})
     return response

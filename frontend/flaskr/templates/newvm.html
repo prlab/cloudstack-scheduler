@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+  <div class="container">
   <h2>New VM</h2>
   <form action="{{ url_for('newvm') }}" method=post>
     <div class=zon>
@@ -40,4 +41,5 @@
     </div>
     <dd><input type=submit value='Schedule VM'>
   </form>
+  </div>
 {% endblock %}

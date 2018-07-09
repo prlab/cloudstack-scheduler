@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block calendar %}
+<meta charset='utf-8' />
+<link href="{{ url_for('static', filename='fullcalendar/fullcalendar.min.css') }}" rel='stylesheet' />
+<link href="{{ url_for('static', filename='fullcalendar/fullcalendar.print.css') }}" rel='stylesheet' media='print' />
+<script src="{{ url_for('static', filename='fullcalendar/lib/moment.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/lib/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/fullcalendar.min.js') }}"></script>
+<script>
+	$(document).ready(function() {
+		$('#calendar').fullCalendar({
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+			defaultDate: Date.now(),
+			editable: false,
+			eventLimit: true, // allow "more" link when too many events
+			events: {
+				url: 'data',
+				error: function() {
+					$('#script-warning').show();
+				}
+			},
+			loading: function(bool) {
+				$('#loading').toggle(bool);
+			}
+		});
+	});
+</script>
+<style>
+	#script-warning {
+		display: none;
+		background: #eee;
+		border-bottom: 1px solid #ddd;
+		padding: 0 10px;
+		line-height: 40px;
+		text-align: center;
+		font-weight: bold;
+		font-size: 12px;
+		color: red;
+	}
+	#loading {
+		display: none;
+		position: absolute;
+		top: 10px;
+		right: 10px;
+	}
+	#calendar {
+		max-width: 900px;
+		margin: 40px auto;
+		padding: 0 10px;
+	}
+</style>
+{% endblock %}
+
+
+{% block body %}
+  <div class="container">
+  <h2>VM calendar</h2>
+    <div id='script-warning'>
+      Error getting data from <code>/data</code> endpoint.
+    </div>
+    <div id='loading'>Loading...</div>
+    <div id='calendar'></div>
+  </div>
+{% endblock %}

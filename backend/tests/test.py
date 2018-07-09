@@ -28,14 +28,13 @@ if login != True and u.usertype != USER:
 serv = u.listServOff()
 temp = u.listTempl()
 zon = u.listZones()
-net = u.listNet()
 
 name = username1 + "-" + str(uuid.uuid4())
 date1 = datetime.datetime.now() +  datetime.timedelta(seconds = 10)
 date2 = datetime.datetime.now() +  datetime.timedelta(seconds = 60)
 duration = datetime.timedelta(seconds = 40)
 print "Scheduling vm with name \"" + name + "\" to be created between " + str(date1) + " and " + str(date2) + " with duration " + str(duration)
-res = s.schedulevm(u, zon[0]['id'], temp[0]['id'], serv[0]['id'], net[0]['id'], name, date1, date2, duration)
+res = s.schedulevm(u, zon[0]['id'], temp[0]['id'], serv[0]['id'], name, date1, date2, duration)
 if res == 0:
     print "Failed to find slot!"
 
@@ -51,14 +50,13 @@ if login != True and u.usertype != USER:
 serv = u.listServOff()
 temp = u.listTempl()
 zon = u.listZones()
-net = u.listNet()
 
 name = username2 + "-" + str(uuid.uuid4())
 date1 = datetime.datetime.now() +  datetime.timedelta(seconds = 20)
 date2 = datetime.datetime.now() +  datetime.timedelta(minutes = 90)
 duration = datetime.timedelta(seconds = 40)
 print "Scheduling vm with name \"" + name + "\" to be created between " + str(date1) + " and " + str(date2) + " with duration " + str(duration)
-res = s.schedulevm(u, zon[0]['id'], temp[0]['id'], serv[0]['id'], net[0]['id'], name, date1, date2, duration)
+res = s.schedulevm(u, zon[0]['id'], temp[0]['id'], serv[0]['id'], name, date1, date2, duration)
 if res == 0:
     print "Failed to find slot"
 
@@ -75,7 +73,7 @@ while exit!=True:
     print "\nScehduled jobs for all users:"
     jobs = s.listjobs()
     for job in jobs:
-        out = "\nScheduled job with id: " + job['id'] + " to create vm at: " + str(job['start']) + " and destroy it at: " + str(job['end']) + " with name: " + job['name'] + " , zone: " + job['zone'] + " , template: " + job['template'] + " , service offering: " + job['serv'] + " , network: " + job['net']
+        out = "\nScheduled job with id: " + job['id'] + " to create vm at: " + str(job['start']) + " and destroy it at: " + str(job['end']) + " with name: " + job['name'] + " , zone: " + job['zone'] + " , template: " + job['template'] + " , service offering: " + job['serv']
         if 'ip' in job:
             out = out + " and ip: " + job['ip']
         out = out + " for user: " + job['user']
@@ -85,7 +83,7 @@ while exit!=True:
       print "\nScehduled jobs for user \"" + username2 + "\":"
       jobs = s.listjobs(u)
       for job in jobs:
-          out = "\nScheduled job with id: " + job['id'] + " to create vm at: " + str(job['start']) + " and destroy it at: " + str(job['end']) + " with name: " + job['name'] + " , zone: " + job['zone'] + " , template: " + job['template'] + " , service offering: " + job['serv'] + " , network: " + job['net']
+          out = "\nScheduled job with id: " + job['id'] + " to create vm at: " + str(job['start']) + " and destroy it at: " + str(job['end']) + " with name: " + job['name'] + " , zone: " + job['zone'] + " , template: " + job['template'] + " , service offering: " + job['serv']
           if 'ip' in job:
               out = out + " and ip: " + job['ip']
           out = out + " for user: " + job['user']

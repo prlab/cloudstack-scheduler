@@ -1,19 +1,43 @@
 <!doctype html>
-<title>Flaskr</title>
+<title>CloudScheduler</title>
+<script src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
 {% block calendar %}{% endblock %}
 <div class=page>
-  <h1>Flaskr</h1>
-  <div class=metanav>
-  {% if not session.username %}
-    <a href="{{ url_for('login') }}">Log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">Log out</a>
-    <a href="{{ url_for('newvm') }}">New VM</a>
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">CloudScheduler</a>
+      </div>
+{% if not session.username %}
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span> Log in</a></li>
+      </ul>
+{% else %}
+      <ul class="nav navbar-nav">
+        <li><a href="{{ url_for('listvms') }}">List VMs</a></li>
+        <li><a href="{{ url_for('calendarvms') }}">VMs calendar</a></li>
+        <li><a href="{{ url_for('newvm') }}">New VM</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+      </ul>
   {% endif %}
+    </div>
+  </nav>
+{% for message in get_flashed_messages() %}
+  <div class="alert alert-info alert-dismissable">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    {{ message }}
   </div>
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
-  {% block body %}{% endblock %}
+{% endfor %}
+
+{% block body %}{% endblock %}
+
 </div>
